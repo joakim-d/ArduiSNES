@@ -36,6 +36,33 @@
 
 #include "Joystick.h"
 
+#define CONTROLLER_1_CLOCK_ON   PORTB |= (1 << PB6) //10 (output)
+#define CONTROLLER_1_CLOCK_OFF  PORTB &= ~(1 << PB6) //10 (output)
+#define CONTROLLER_1_STROBE_ON  PORTB |= (1 << PB5) //9 (output)
+#define CONTROLLER_1_STROBE_OFF PORTB &= ~(1 << PB5) //9 (output)
+#define CONTROLLER_1_DATA       (PINB & (1 << PB4)) //8 (input)
+
+#define CONTROLLER_2_CLOCK_ON   PORTC |= (1 << 7) //13 (output)
+#define CONTROLLER_2_CLOCK_OFF  PORTC &= ~(1 << 7) //13 (output)
+#define CONTROLLER_2_STROBE_ON  PORTD |= (1 << 6) //12 (output)
+#define CONTROLLER_2_STROBE_OFF PORTD &= ~(1 << 6) //12 (output)
+#define CONTROLLER_2_DATA       PINB & (1 << 7) //11 (input)
+
+#define CONTROLLER_3_CLOCK_ON   PORTE |= (1 << PE6) //7 (output)
+#define CONTROLLER_3_CLOCK_OFF  PORTE &= ~(1 << PE6) //7 (output)
+#define CONTROLLER_3_STROBE_ON  PORTD |= (1 << PD7) //6 (output)
+#define CONTROLLER_3_STROBE_OFF PORTD &= ~(1 << PD7) //6 (output)
+#define CONTROLLER_3_DATA       PINC & (1 << PC6) //5 (input)
+
+#define CONTROLLER_4_CLOCK_ON   PORTD |= (1 << PD4) //4 (output)
+#define CONTROLLER_4_CLOCK_OFF  PORTD &= ~(1 << PD4) //4 (output)
+#define CONTROLLER_4_STROBE_ON  PORTD |= (1 << PD0) //3 (output)
+#define CONTROLLER_4_STROBE_OFF PORTD &= ~(1 << PD0) //3 (output)
+#define CONTROLLER_4_DATA       PIND & (1 << PD1) //2 (input)
+
+
+static USB_JoystickReport_Data_t controllers_data[4];
+
 /** Main program entry point. This routine configures the hardware required by the application, then
  *  enters a loop to run the application tasks in sequence.
  */
@@ -50,7 +77,20 @@ int main(void)
 	{
 		HID_Task();
 		USB_USBTask();
+        _delay_ms(16);
 	}
+}
+
+void IOs_Init(void) {
+    //Configure IO directions
+    PORTB = 0;
+    PORTC = 0;
+    PORTD = 0;
+    PORTE = 0;
+    DDRB = (1 << PB5) | (1 << PB6);
+    DDRC = (1 << PC7);
+    DDRD = (1 << PD0) | (1 << PD4) | (1 << PD6) | (1 << PD7);
+    DDRE = (1 << PE6);
 }
 
 /** Configures the board hardware and chip peripherals for the demo's functionality. */
@@ -78,7 +118,9 @@ void SetupHardware(void)
 	/* Hardware Initialization */
 	LEDs_Init();
 	USB_Init();
+    IOs_Init();
 }
+
 
 /** Event handler for the USB_Connect event. This indicates that the device is enumerating via the status LEDs and
  *  starts the library USB task to begin the enumeration and USB management process.
@@ -113,7 +155,235 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 
 
 	/* Indicate endpoint configuration success or failure */
-	LEDs_SetAllLEDs(ConfigSuccess ? LEDMASK_USB_READY : LEDMASK_USB_ERROR);
+    LEDs_SetAllLEDs(ConfigSuccess ? LEDMASK_USB_READY : LEDMASK_USB_ERROR);
+}
+
+void getController1State(USB_JoystickReport_Data_t* data){
+    cli();
+    CONTROLLER_1_STROBE_ON; //latch pulse for 12 microseconds
+    _delay_us(12);
+    CONTROLLER_1_STROBE_OFF;
+
+    data->nes_buttons = CONTROLLER_1_DATA ? 0 : 1;
+    _delay_us(6);
+
+    CONTROLLER_1_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_1_DATA ? 0 : 2;
+    CONTROLLER_1_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_1_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_1_DATA  ? 0 : 4;
+    CONTROLLER_1_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_1_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_1_DATA  ? 0 : 8;
+    CONTROLLER_1_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_1_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_1_DATA ? 0 : 0x10;
+    CONTROLLER_1_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_1_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_1_DATA ? 0 : 0x20;
+    CONTROLLER_1_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_1_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_1_DATA ? 0 : 0x40;
+    CONTROLLER_1_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_1_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_1_DATA ? 0 : 0x80;
+    CONTROLLER_1_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_1_CLOCK_ON;
+    _delay_us(6);
+    CONTROLLER_1_CLOCK_OFF;
+    sei();
+}
+
+void getController2State(USB_JoystickReport_Data_t* data){
+    cli();
+    CONTROLLER_2_STROBE_ON; //latch pulse for 12 microseconds
+    _delay_us(12);
+    CONTROLLER_2_STROBE_OFF;
+
+    data->nes_buttons = CONTROLLER_2_DATA ? 0 : 1;
+    _delay_us(6);
+
+    CONTROLLER_2_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_2_DATA ? 0 : 2;
+    CONTROLLER_2_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_2_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_2_DATA  ? 0 : 4;
+    CONTROLLER_2_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_2_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_2_DATA  ? 0 : 8;
+    CONTROLLER_2_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_2_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_2_DATA ? 0 : 0x10;
+    CONTROLLER_2_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_2_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_2_DATA ? 0 : 0x20;
+    CONTROLLER_2_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_2_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_2_DATA ? 0 : 0x40;
+    CONTROLLER_2_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_2_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_2_DATA ? 0 : 0x80;
+    CONTROLLER_2_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_2_CLOCK_ON;
+    _delay_us(6);
+    CONTROLLER_2_CLOCK_OFF;
+    sei();
+}
+
+void getController3State(USB_JoystickReport_Data_t* data){
+    cli();
+    CONTROLLER_3_STROBE_ON; //latch pulse for 12 microseconds
+    _delay_us(12);
+    CONTROLLER_3_STROBE_OFF;
+
+    data->nes_buttons = CONTROLLER_3_DATA ? 0 : 1;
+    _delay_us(6);
+
+    CONTROLLER_3_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_3_DATA ? 0 : 2;
+    CONTROLLER_3_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_3_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_3_DATA  ? 0 : 4;
+    CONTROLLER_3_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_3_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_3_DATA  ? 0 : 8;
+    CONTROLLER_3_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_3_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_3_DATA ? 0 : 0x10;
+    CONTROLLER_3_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_3_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_3_DATA ? 0 : 0x20;
+    CONTROLLER_3_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_3_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_3_DATA ? 0 : 0x40;
+    CONTROLLER_3_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_3_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_3_DATA ? 0 : 0x80;
+    CONTROLLER_3_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_3_CLOCK_ON;
+    _delay_us(6);
+    CONTROLLER_3_CLOCK_OFF;
+    sei();
+}
+
+void getController4State(USB_JoystickReport_Data_t* data){
+    cli();
+    CONTROLLER_4_STROBE_ON; //latch pulse for 12 microseconds
+    _delay_us(12);
+    CONTROLLER_4_STROBE_OFF;
+
+    data->nes_buttons = CONTROLLER_4_DATA ? 0 : 1;
+    _delay_us(6);
+
+    CONTROLLER_4_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_4_DATA ? 0 : 2;
+    CONTROLLER_4_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_4_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_4_DATA  ? 0 : 4;
+    CONTROLLER_4_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_4_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_4_DATA  ? 0 : 8;
+    CONTROLLER_4_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_4_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_4_DATA ? 0 : 0x10;
+    CONTROLLER_4_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_4_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_4_DATA ? 0 : 0x20;
+    CONTROLLER_4_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_4_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_4_DATA ? 0 : 0x40;
+    CONTROLLER_4_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_4_CLOCK_ON;
+    _delay_us(6);
+    data->nes_buttons |= CONTROLLER_4_DATA ? 0 : 0x80;
+    CONTROLLER_4_CLOCK_OFF;
+    _delay_us(6);
+
+    CONTROLLER_4_CLOCK_ON;
+    _delay_us(6);
+    CONTROLLER_4_CLOCK_OFF;
+    sei();
 }
 
 /** Event handler for the USB_ControlRequest event. This is used to catch and process control requests sent to
@@ -123,53 +393,30 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 void EVENT_USB_Device_ControlRequest(void)
 {
 	/* Handle HID Class specific requests */
+
 	switch (USB_ControlRequest.bRequest)
 	{
 		case HID_REQ_GetReport:
 			if (USB_ControlRequest.bmRequestType == (REQDIR_DEVICETOHOST | REQTYPE_CLASS | REQREC_INTERFACE))
 			{
-				USB_JoystickReport_Data_t JoystickReportData;
-
 				/* Create the next HID report to send to the host */
-				GetNextReport(&JoystickReportData);
-
+                uint8_t* report_data;
 				Endpoint_ClearSETUP();
+                switch(USB_ControlRequest.wIndex){
+                    case 0: report_data = (uint8_t*)&controllers_data[0].nes_buttons; break;
+                    case 1: report_data = (uint8_t*)&controllers_data[1].nes_buttons; break;
+                    case 2: report_data = (uint8_t*)&controllers_data[2].nes_buttons; break;
+                    case 3: report_data = (uint8_t*)&controllers_data[3].nes_buttons; break;
+                    default: return;
+                }
 
 				/* Write the report data to the control endpoint */
-				Endpoint_Write_Control_Stream_LE(&JoystickReportData, sizeof(JoystickReportData));
+                Endpoint_Write_Control_Stream_LE(report_data, 1);
 				Endpoint_ClearOUT();
 			}
 
 			break;
 	}
-}
-
-/** Fills the given HID report data structure with the next HID report to send to the host.
- *
- *  \param[out] ReportData  Pointer to a HID report data structure to be filled
- *
- *  \return Boolean \c true if the new report differs from the last report, \c false otherwise
- */
-bool GetNextReport(USB_JoystickReport_Data_t* const ReportData)
-{
-	static uint8_t PrevJoyStatus    = 0;
-	static uint8_t PrevButtonStatus = 0;
-	uint8_t        JoyStatus_LCL    = 0;
-	uint8_t        ButtonStatus_LCL = 0; 
-	bool           InputChanged     = false;
-
-	/* Clear the report contents */
-	memset(ReportData, 0, sizeof(USB_JoystickReport_Data_t));
-
-	/* Check if the new report is different to the previous report */
-	InputChanged = (uint8_t)(PrevJoyStatus ^ JoyStatus_LCL) | (uint8_t)(PrevButtonStatus ^ ButtonStatus_LCL);
-
-	/* Save the current joystick status for later comparison */
-	PrevJoyStatus    = JoyStatus_LCL;
-	PrevButtonStatus = ButtonStatus_LCL;
-
-	/* Return whether the new report is different to the previous report or not */
-	return InputChanged;
 }
 
 /** Function to manage HID report generation and transmission to the host. */
@@ -179,25 +426,62 @@ void HID_Task(void)
 	if (USB_DeviceState != DEVICE_STATE_Configured)
 	  return;
 
+    getController1State(&controllers_data[0]);
+    getController2State(&controllers_data[1]);
+    getController3State(&controllers_data[2]);
+    getController4State(&controllers_data[3]);
+
 	/* Select the Joystick Report Endpoint */
     Endpoint_SelectEndpoint(JOYSTICK_EPADDR_1);
 
 	/* Check to see if the host is ready for another packet */
 	if (Endpoint_IsINReady())
 	{
-		USB_JoystickReport_Data_t JoystickReportData;
-
-		/* Create the next HID report to send to the host */
-		GetNextReport(&JoystickReportData);
-
 		/* Write Joystick Report Data */
-		Endpoint_Write_Stream_LE(&JoystickReportData, sizeof(JoystickReportData), NULL);
+        Endpoint_Write_Stream_LE(&controllers_data[0].nes_buttons, 1, NULL);
 
 		/* Finalize the stream transfer to send the last packet */
 		Endpoint_ClearIN();
-
-		/* Clear the report data afterwards */
-		memset(&JoystickReportData, 0, sizeof(JoystickReportData));
 	}
+
+    /* Select the Joystick Report Endpoint */
+    Endpoint_SelectEndpoint(JOYSTICK_EPADDR_2);
+
+    /* Check to see if the host is ready for another packet */
+    if (Endpoint_IsINReady())
+    {
+        /* Write Joystick Report Data */
+        Endpoint_Write_Stream_LE(&controllers_data[1].nes_buttons, 1, NULL);
+
+        /* Finalize the stream transfer to send the last packet */
+        Endpoint_ClearIN();
+    }
+
+    /* Select the Joystick Report Endpoint */
+    Endpoint_SelectEndpoint(JOYSTICK_EPADDR_3);
+
+    /* Check to see if the host is ready for another packet */
+    if (Endpoint_IsINReady())
+    {
+        /* Write Joystick Report Data */
+        Endpoint_Write_Stream_LE(&controllers_data[2].nes_buttons, 1, NULL);
+
+        /* Finalize the stream transfer to send the last packet */
+        Endpoint_ClearIN();
+    }
+
+    /* Select the Joystick Report Endpoint */
+    Endpoint_SelectEndpoint(JOYSTICK_EPADDR_4);
+
+    /* Check to see if the host is ready for another packet */
+    if (Endpoint_IsINReady())
+    {
+        /* Write Joystick Report Data */
+        Endpoint_Write_Stream_LE(&controllers_data[3].nes_buttons, 1, NULL);
+
+        /* Finalize the stream transfer to send the last packet */
+        Endpoint_ClearIN();
+    }
+
 }
 

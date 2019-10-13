@@ -46,7 +46,7 @@
 const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
 {
 	HID_RI_USAGE_PAGE(8, 0x01), /* Generic Desktop */
-	HID_RI_USAGE(8, 0x04), /* Joystick */
+    HID_RI_USAGE(8, 0x05), /* Gamepad */
 	HID_RI_COLLECTION(8, 0x01), /* Application */
 		HID_RI_USAGE_PAGE(8, 0x09), /* Button */
 		HID_RI_USAGE_MINIMUM(8, 0x01),
