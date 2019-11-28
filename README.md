@@ -1,5 +1,5 @@
-# ArduiNES
-Four NES controllers to USB using Arduino Leonardo board
+# ArduiSNES
+Four SNES controllers to USB using Arduino Leonardo board
 
 # Project configuration and compilation
 Clone the project locally, then in a shell terminal type the following commands
