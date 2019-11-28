@@ -69,7 +69,7 @@
 		 */
 		typedef struct
 		{
-            uint8_t  nes_buttons; /**< Current absolute joystick X position, as a signed 8-bit integer */
+            uint16_t  snes_buttons; /**< Current absolute joystick X position, as a signed 8-bit integer */
 		} USB_JoystickReport_Data_t;
 
 	/* Function Prototypes: */

@@ -164,50 +164,16 @@ void getController1State(USB_JoystickReport_Data_t* data){
     _delay_us(12);
     CONTROLLER_1_STROBE_OFF;
 
-    data->nes_buttons = CONTROLLER_1_DATA ? 0 : 1;
+    data->snes_buttons = CONTROLLER_1_DATA ? 0 : 1;
     _delay_us(6);
 
-    CONTROLLER_1_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_1_DATA ? 0 : 2;
-    CONTROLLER_1_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_1_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_1_DATA  ? 0 : 4;
-    CONTROLLER_1_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_1_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_1_DATA  ? 0 : 8;
-    CONTROLLER_1_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_1_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_1_DATA ? 0 : 0x10;
-    CONTROLLER_1_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_1_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_1_DATA ? 0 : 0x20;
-    CONTROLLER_1_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_1_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_1_DATA ? 0 : 0x40;
-    CONTROLLER_1_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_1_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_1_DATA ? 0 : 0x80;
-    CONTROLLER_1_CLOCK_OFF;
-    _delay_us(6);
+    for(int i = 1; i < 16; i++){
+        CONTROLLER_1_CLOCK_ON;
+        _delay_us(6);
+        data->snes_buttons |= CONTROLLER_1_DATA ? 0 : 1 << i;
+        CONTROLLER_1_CLOCK_OFF;
+        _delay_us(6);
+    }
 
     CONTROLLER_1_CLOCK_ON;
     _delay_us(6);
@@ -221,168 +187,66 @@ void getController2State(USB_JoystickReport_Data_t* data){
     _delay_us(12);
     CONTROLLER_2_STROBE_OFF;
 
-    data->nes_buttons = CONTROLLER_2_DATA ? 0 : 1;
+    data->snes_buttons = CONTROLLER_2_DATA ? 0 : 1;
     _delay_us(6);
 
-    CONTROLLER_2_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_2_DATA ? 0 : 2;
-    CONTROLLER_2_CLOCK_OFF;
-    _delay_us(6);
+    for(int i = 1; i < 16; i++){
+        CONTROLLER_2_CLOCK_ON;
+        _delay_us(6);
+        data->snes_buttons |= CONTROLLER_2_DATA ? 0 : 1 << i;
+        CONTROLLER_1_CLOCK_OFF;
+        _delay_us(6);
+    }
 
-    CONTROLLER_2_CLOCK_ON;
+    CONTROLLER_1_CLOCK_ON;
     _delay_us(6);
-    data->nes_buttons |= CONTROLLER_2_DATA  ? 0 : 4;
-    CONTROLLER_2_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_2_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_2_DATA  ? 0 : 8;
-    CONTROLLER_2_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_2_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_2_DATA ? 0 : 0x10;
-    CONTROLLER_2_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_2_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_2_DATA ? 0 : 0x20;
-    CONTROLLER_2_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_2_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_2_DATA ? 0 : 0x40;
-    CONTROLLER_2_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_2_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_2_DATA ? 0 : 0x80;
-    CONTROLLER_2_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_2_CLOCK_ON;
-    _delay_us(6);
-    CONTROLLER_2_CLOCK_OFF;
+    CONTROLLER_1_CLOCK_OFF;
     sei();
 }
 
 void getController3State(USB_JoystickReport_Data_t* data){
     cli();
-    CONTROLLER_3_STROBE_ON; //latch pulse for 12 microseconds
+    CONTROLLER_1_STROBE_ON; //latch pulse for 12 microseconds
     _delay_us(12);
-    CONTROLLER_3_STROBE_OFF;
+    CONTROLLER_1_STROBE_OFF;
 
-    data->nes_buttons = CONTROLLER_3_DATA ? 0 : 1;
-    _delay_us(6);
-
-    CONTROLLER_3_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_3_DATA ? 0 : 2;
-    CONTROLLER_3_CLOCK_OFF;
+    data->snes_buttons = CONTROLLER_1_DATA ? 0 : 1;
     _delay_us(6);
 
-    CONTROLLER_3_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_3_DATA  ? 0 : 4;
-    CONTROLLER_3_CLOCK_OFF;
-    _delay_us(6);
+    for(int i = 1; i < 16; i++){
+        CONTROLLER_1_CLOCK_ON;
+        _delay_us(6);
+        data->snes_buttons |= CONTROLLER_1_DATA ? 0 : 1 << i;
+        CONTROLLER_1_CLOCK_OFF;
+        _delay_us(6);
+    }
 
-    CONTROLLER_3_CLOCK_ON;
+    CONTROLLER_1_CLOCK_ON;
     _delay_us(6);
-    data->nes_buttons |= CONTROLLER_3_DATA  ? 0 : 8;
-    CONTROLLER_3_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_3_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_3_DATA ? 0 : 0x10;
-    CONTROLLER_3_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_3_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_3_DATA ? 0 : 0x20;
-    CONTROLLER_3_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_3_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_3_DATA ? 0 : 0x40;
-    CONTROLLER_3_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_3_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_3_DATA ? 0 : 0x80;
-    CONTROLLER_3_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_3_CLOCK_ON;
-    _delay_us(6);
-    CONTROLLER_3_CLOCK_OFF;
+    CONTROLLER_1_CLOCK_OFF;
     sei();
 }
 
 void getController4State(USB_JoystickReport_Data_t* data){
     cli();
-    CONTROLLER_4_STROBE_ON; //latch pulse for 12 microseconds
+    CONTROLLER_1_STROBE_ON; //latch pulse for 12 microseconds
     _delay_us(12);
-    CONTROLLER_4_STROBE_OFF;
+    CONTROLLER_1_STROBE_OFF;
 
-    data->nes_buttons = CONTROLLER_4_DATA ? 0 : 1;
-    _delay_us(6);
-
-    CONTROLLER_4_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_4_DATA ? 0 : 2;
-    CONTROLLER_4_CLOCK_OFF;
+    data->snes_buttons = CONTROLLER_1_DATA ? 0 : 1;
     _delay_us(6);
 
-    CONTROLLER_4_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_4_DATA  ? 0 : 4;
-    CONTROLLER_4_CLOCK_OFF;
-    _delay_us(6);
+    for(int i = 1; i < 16; i++){
+        CONTROLLER_1_CLOCK_ON;
+        _delay_us(6);
+        data->snes_buttons |= CONTROLLER_1_DATA ? 0 : 1 << i;
+        CONTROLLER_1_CLOCK_OFF;
+        _delay_us(6);
+    }
 
-    CONTROLLER_4_CLOCK_ON;
+    CONTROLLER_1_CLOCK_ON;
     _delay_us(6);
-    data->nes_buttons |= CONTROLLER_4_DATA  ? 0 : 8;
-    CONTROLLER_4_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_4_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_4_DATA ? 0 : 0x10;
-    CONTROLLER_4_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_4_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_4_DATA ? 0 : 0x20;
-    CONTROLLER_4_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_4_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_4_DATA ? 0 : 0x40;
-    CONTROLLER_4_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_4_CLOCK_ON;
-    _delay_us(6);
-    data->nes_buttons |= CONTROLLER_4_DATA ? 0 : 0x80;
-    CONTROLLER_4_CLOCK_OFF;
-    _delay_us(6);
-
-    CONTROLLER_4_CLOCK_ON;
-    _delay_us(6);
-    CONTROLLER_4_CLOCK_OFF;
+    CONTROLLER_1_CLOCK_OFF;
     sei();
 }
 
@@ -400,18 +264,18 @@ void EVENT_USB_Device_ControlRequest(void)
 			if (USB_ControlRequest.bmRequestType == (REQDIR_DEVICETOHOST | REQTYPE_CLASS | REQREC_INTERFACE))
 			{
 				/* Create the next HID report to send to the host */
-                uint8_t* report_data;
+                uint16_t* report_data;
 				Endpoint_ClearSETUP();
                 switch(USB_ControlRequest.wIndex){
-                    case 0: report_data = (uint8_t*)&controllers_data[0].nes_buttons; break;
-                    case 1: report_data = (uint8_t*)&controllers_data[1].nes_buttons; break;
-                    case 2: report_data = (uint8_t*)&controllers_data[2].nes_buttons; break;
-                    case 3: report_data = (uint8_t*)&controllers_data[3].nes_buttons; break;
+                    case 0: report_data = (uint16_t*)&controllers_data[0].snes_buttons; break;
+                    case 1: report_data = (uint16_t*)&controllers_data[1].snes_buttons; break;
+                    case 2: report_data = (uint16_t*)&controllers_data[2].snes_buttons; break;
+                    case 3: report_data = (uint16_t*)&controllers_data[3].snes_buttons; break;
                     default: return;
                 }
 
 				/* Write the report data to the control endpoint */
-                Endpoint_Write_Control_Stream_LE(report_data, 1);
+                Endpoint_Write_Control_Stream_LE(report_data, 2);
 				Endpoint_ClearOUT();
 			}
 
@@ -438,7 +302,7 @@ void HID_Task(void)
 	if (Endpoint_IsINReady())
 	{
 		/* Write Joystick Report Data */
-        Endpoint_Write_Stream_LE(&controllers_data[0].nes_buttons, 1, NULL);
+        Endpoint_Write_Stream_LE(&controllers_data[0].snes_buttons, 2, NULL);
 
 		/* Finalize the stream transfer to send the last packet */
 		Endpoint_ClearIN();
@@ -451,7 +315,7 @@ void HID_Task(void)
     if (Endpoint_IsINReady())
     {
         /* Write Joystick Report Data */
-        Endpoint_Write_Stream_LE(&controllers_data[1].nes_buttons, 1, NULL);
+        Endpoint_Write_Stream_LE(&controllers_data[1].snes_buttons, 2, NULL);
 
         /* Finalize the stream transfer to send the last packet */
         Endpoint_ClearIN();
@@ -464,7 +328,7 @@ void HID_Task(void)
     if (Endpoint_IsINReady())
     {
         /* Write Joystick Report Data */
-        Endpoint_Write_Stream_LE(&controllers_data[2].nes_buttons, 1, NULL);
+        Endpoint_Write_Stream_LE(&controllers_data[2].snes_buttons, 2, NULL);
 
         /* Finalize the stream transfer to send the last packet */
         Endpoint_ClearIN();
@@ -477,7 +341,7 @@ void HID_Task(void)
     if (Endpoint_IsINReady())
     {
         /* Write Joystick Report Data */
-        Endpoint_Write_Stream_LE(&controllers_data[3].nes_buttons, 1, NULL);
+        Endpoint_Write_Stream_LE(&controllers_data[3].snes_buttons, 2, NULL);
 
         /* Finalize the stream transfer to send the last packet */
         Endpoint_ClearIN();
